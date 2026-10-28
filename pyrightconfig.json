@@ -1,0 +1,30 @@
+{
+    "exclude": [
+        "**/node_modules",
+        "**/__pycache__",
+        "**/build",
+        ".git",
+        "myenv/**",
+        "data/",
+        "datasets",
+        "dataset",
+        "test_dataset",
+        "test_infer_dataset",
+        "datasets2",
+        "dataset3",
+        "dataset4",
+        "dataset*",
+        "**/datasets",
+        "data_preprocess/assets",
+        "audio2mot/assets",
+        "**/assets",
+        "**/models",
+        "**/nvdiffrast",
+        "**/logs",
+        "**/logs/*.log",
+        "*.log",
+        "logs",
+        "training-runs",
+        "**/training-runs"
+    ]
+}

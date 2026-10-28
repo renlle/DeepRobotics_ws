@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<dds xmlns="http://www.eprosima.com/XMLSchemas/fastrtps_profiles">
+    <profiles>
+        <transport_descriptors>
+            <transport_descriptor>
+                <transport_id>udp_transport</transport_id>
+                <type>UDPv4</type>
+                <!-- 增大 DDS 收发缓冲，避免算法满载时点云 UDP 突发导致丢包。 -->
+                <sendBufferSize>8388608</sendBufferSize>
+                <receiveBufferSize>8388608</receiveBufferSize>
+            </transport_descriptor>
+        </transport_descriptors>
+        <participant profile_name="udp_only_participant" is_default_profile="true">
+            <rtps>
+                <userTransports>
+                    <transport_id>udp_transport</transport_id>
+                </userTransports>
+                <useBuiltinTransports>false</useBuiltinTransports>
+            </rtps>
+        </participant>
+    </profiles>
+</dds>

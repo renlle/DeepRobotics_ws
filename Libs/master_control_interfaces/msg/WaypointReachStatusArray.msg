@@ -1,0 +1,2 @@
+std_msgs/Header header
+master_control_interfaces/WaypointReachStatus[] waypoints

@@ -1,0 +1,143 @@
+# Device Profile: M20 前置支架（雷达 30° 倾角）
+# 说明: 默认使用 640x512 降采样图像分辨率参数。如需切换至 1280x1024 原图分辨率，请参考 camera 段落行尾注释修改内参。
+/**:
+  ros__parameters:
+    ros_domain_id: 42
+    # 近似安装初值，非精确标定：M20 背部中心为 base_link 原点，x 正方向为正前方。
+    # 雷达在 base_link 中位置 (0.20, 0, 0.23)m，沿用原倾斜方向，倾角由 22° 调整为 30°。
+    # 实际矩阵方向为 base_link -> lidar/body：p_lidar = R * p_base + t。
+    # 平移为 -R * [0.20, 0, 0.23]，不是直接填写雷达安装位置。
+    T_lidar_base: [
+             0.866025,   0.000000,  -0.500000,  -0.058205,
+             0.000000,   1.000000,   0.000000,   0.000000,
+             0.500000,   0.000000,   0.866025,  -0.299186,
+             0.000000,   0.000000,   0.000000,   1.000000
+      ]
+
+    # ==========================================================
+    # 传感器间的 4x4 齐次外参矩阵 (Row-Major, 16 elements)
+    # ==========================================================
+    extrin_calib:
+      # IMU 到 激光雷达 (imu -> lidar)
+      T_imu_lidar: [
+             1.000000,   0.000000,   0.000000,  -0.011000,
+             0.000000,   1.000000,   0.000000,  -0.023290,
+             0.000000,   0.000000,   1.000000,   0.044120,
+             0.000000,   0.000000,   0.000000,   1.000000
+      ]
+
+      # 实际方向：激光雷达 -> 相机光学坐标系，p_camera = R * p_lidar + t。
+      # 相机在 base_link 中位置 (0.20, 0, 0.11)m，与雷达的 x、y 相同；相机相对车体朝向沿用旧外参推算值。
+      # 用旧 R_camera_lidar * R_lidar_base 保持相机相对车体朝向，再结合雷达的新 30° 姿态。
+      # 两者垂直高度差 0.12m；仍需实机联合标定，不能直接用于精确彩色投影验收。
+      T_camera_lidar: [
+             0.028055,  -0.999458,   0.017233,   0.000108,
+             0.524276,   0.000034,  -0.851549,  -0.119952,
+             0.851086,   0.032924,   0.523993,   0.003390,
+             0.000000,   0.000000,   0.000000,   1.000000
+      ]
+
+    # ==========================================================
+    # 相机内参及畸变参数 (原 camera_mid360.yaml)
+    # ==========================================================
+    camera:
+      model: Pinhole
+      width: 640 # 1280x1024 原图版: 1280
+      height: 512 # 1280x1024 原图版: 1024
+      scale: 1.0 # 1280x1024 原图版: 0.5
+      fx: 645.96815 # 1280x1024 原图版: 1291.9363
+      fy: 645.981 # 1280x1024 原图版: 1291.9620
+      cx: 313.6038 # 1280x1024 原图版: 627.2076
+      cy: 257.8838 # 1280x1024 原图版: 515.7676
+      d0: -0.09454293973133182
+      d1: 0.2549060543551655
+      d2: -0.001344248648876502
+      d3: -0.0019596226081252314
+
+    # ==========================================================
+    # ArUco 码检测与闭环约束配置
+    # ==========================================================
+    aruco:
+      aruco_en: true # 开关：仅当 aruco_en: true 且 img_en: true 时开启检测
+      dictionary: "6X6_50" # ArUco 字典类型 (支持 "6X6_50", "4X4_50", "36h11" 等)
+      marker_size: 0.20 # ArUco 物理边长 (单位: 米)
+
+    # ==========================================================
+    # 雷达、IMU及算法核心配置 (原 mid360.yaml)
+    # ==========================================================
+    common:
+      img_topic: "/left_camera/image"
+      lid_topic: "/livox/lidar"
+      imu_topic: "/livox/imu"
+      img_en: 1
+      disable_vision_on_tracking: true
+      lidar_en: 1
+      ros_driver_bug_fix: false
+
+    time_offset:
+      imu_time_offset: 0.0
+      img_time_offset: 0.0
+      exposure_time_init: 0.0
+
+    preprocess:
+      point_filter_num: 1
+      filter_size_surf: 0.2
+      lidar_type: 3
+      scan_line: 6
+      blind: 0.15
+
+    vio:
+      max_iterations: 5
+      outlier_threshold: 1000
+      img_point_cov: 1000
+      patch_size: 8
+      patch_pyrimid_level: 4
+      normal_en: true
+      raycast_en: false
+      inverse_composition_en: false
+      exposure_estimate_en: true
+      inv_expo_cov: 0.1
+
+    imu:
+      imu_en: true
+      imu_int_frame: 30
+      acc_cov: 1.0 # 机器狗设备：大协方差(1.0)，降低 IMU 权重，平衡下楼冲击与特征缺失区域的惯性依赖
+      gyr_cov: 1.0 # 机器狗设备：大协方差(1.0)，降低 IMU 权重
+      b_acc_cov: 0.0001
+      b_gyr_cov: 0.0001
+
+    lio:
+      max_iterations: 5
+      dept_err: 0.02
+      beam_err: 0.05
+      min_eigen_value: 0.005
+      voxel_size: 0.2
+      max_layer: 2
+      max_points_num: 50
+      layer_init_num: [5, 5, 5, 5, 5]
+
+    local_map:
+      map_sliding_en: false
+      half_map_size: 100
+      sliding_thresh: 8.0
+
+    uav:
+      imu_rate_odom: false
+      gravity_align_en: true
+
+    publish:
+      dense_map_en: true
+      pub_effect_point_en: false
+      pub_plane_en: false
+      pub_scan_num: 1
+      blind_rgb_points: 0.0
+
+    evo:
+      seq_name: "Mid360_Mapping"
+      pose_output_en: false
+
+    pcd_save:
+      pcd_save_en: false
+      colmap_output_en: false
+      filter_size_pcd: 0.1
+      interval: -1

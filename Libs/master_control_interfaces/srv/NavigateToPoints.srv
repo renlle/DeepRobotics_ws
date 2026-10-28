@@ -1,0 +1,7 @@
+geometry_msgs/PointStamped[] targets
+# 预留巡检配置路径；本版本不读取、不启用。
+string config_path "none"
+---
+bool success
+string message
+uint32 accepted_count

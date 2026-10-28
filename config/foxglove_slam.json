@@ -1,0 +1,75 @@
+{
+  "name": "DeepRobotics SLAM（camera_init，轻量）",
+  "layout": {
+    "direction": "row",
+    "first": "3D Panel!slam",
+    "second": "ImageViewPanel!camera",
+    "splitPercentage": 75
+  },
+  "configById": {
+    "3D Panel!slam": {
+      "checkedKeys": [
+        "name:Topics",
+        "t:/tf",
+        "t:/tf_static",
+        "t:/cloud_registered",
+        "t:/path",
+        "t:/aft_pgo_path",
+        "t:/global_localization/path",
+        "t:/loop_closure_constraints",
+        "t:/visualization_marker",
+        "t:/aft_mapped_to_init"
+      ],
+      "expandedKeys": ["name:Topics", "t:/tf"],
+      "followTf": "camera_init",
+      "followOrientation": false,
+      "cameraState": {
+        "targetOffset": [0, 0, 0],
+        "thetaOffset": 0.78,
+        "distance": 30,
+        "perspective": true,
+        "phi": 0.92,
+        "fovy": 0.7853981633974483,
+        "near": 0.01,
+        "far": 5000
+      },
+      "modifiedNamespaceTopics": [],
+      "pinTopics": false,
+      "settingsByKey": {
+        "t:/cloud_registered": {
+          "pointSize": 2,
+          "pointShape": "circle",
+          "colorMode": {"mode": "rainbow", "colorField": "z"}
+        },
+        "t:/Laser_map": {
+          "pointSize": 1,
+          "pointShape": "circle",
+          "colorMode": {"mode": "rainbow", "colorField": "z"}
+        },
+        "t:/cloud_effected": {
+          "pointSize": 3,
+          "colorMode": {"mode": "rainbow", "colorField": "intensity"}
+        },
+        "t:/global_localization/cur_scan": {"pointSize": 4},
+        "t:/global_localization/submap_highlight": {
+          "pointSize": 3,
+          "colorMode": {"mode": "flat", "flatColor": {"r": 1, "g": 0.31, "b": 0.31, "a": 0.7}}
+        }
+      },
+      "autoSyncCameraState": false,
+      "autoTextBackgroundColor": true
+    },
+    "ImageViewPanel!camera": {
+      "cameraTopic": "/rgb_img/compressed",
+      "enabledMarkerTopics": [],
+      "customMarkerTopicOptions": [],
+      "transformMarkers": false,
+      "synchronize": false,
+      "mode": "fit"
+    }
+  },
+  "globalVariables": {},
+  "userNodes": {},
+  "linkedGlobalVariables": [],
+  "playbackConfig": {"speed": 1, "messageOrder": "receiveTime", "timeDisplayMethod": "ROS"}
+}
