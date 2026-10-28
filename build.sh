@@ -12,37 +12,11 @@ if [[ ! -f "${ROS_SETUP}" ]]; then
 fi
 
 cd "${WORKSPACE_DIR}"
-
-# 仅在构建子进程中排除 Conda 搜索路径，避免系统编译器链接到 gait 的 ICU/C++ 库。
-for variable in PATH LD_LIBRARY_PATH LIBRARY_PATH CPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH CMAKE_PREFIX_PATH PKG_CONFIG_PATH PYTHONPATH; do
-    IFS=: read -r -a entries <<< "${!variable:-}"
-    filtered=()
-    for entry in "${entries[@]}"; do
-        case "${entry}" in
-            *miniforge*|*miniconda*|*anaconda*) continue ;;
-        esac
-        if [[ -n "${CONDA_PREFIX:-}" && "${entry}" == "${CONDA_PREFIX}"* ]]; then
-            continue
-        fi
-        [[ -z "${entry}" ]] || filtered+=("${entry}")
-    done
-    printf -v "${variable}" '%s' "$(IFS=:; echo "${filtered[*]}")"
-    export "${variable}"
-done
-unset CONDA_PREFIX CONDA_DEFAULT_ENV CONDA_PYTHON_EXE PYTHONHOME
 source "${ROS_SETUP}"
 
-# 基础接口与总控包必须随全工程编译；保留数组以明确构建范围要求，不使用
-# --packages-up-to，避免意外排除工作区内其他算法包。
-CORE_PACKAGES=(drdds master_control_interfaces master_control)
-echo "全量编译工作区（包含：${CORE_PACKAGES[*]}）"
-
-# 保留 install 和编译对象，仅刷新 CMake 缓存以清除旧 Conda 库、头文件和解释器路径。
-# ROS 接口生成使用系统 Python，不影响运行时 gait 环境。
-/usr/bin/python3 -m colcon build --symlink-install --cmake-clean-cache \
+# 默认增量编译，不删除 install，避免控制台运行时功能路径失效。
+colcon build --symlink-install \
     --cmake-args \
-    -DPython3_EXECUTABLE=/usr/bin/python3 \
-    -DPYTHON_EXECUTABLE=/usr/bin/python3 \
     -DCMAKE_BUILD_TYPE=Release \
     -DROS_EDITION=ROS2 \
     --no-warn-unused-cli
