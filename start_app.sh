@@ -56,4 +56,8 @@ flock -u 9
 exec 9>&-
 echo "已重新启动总控导航节点（PID=${MASTER_CONTROL_PID}）。"
 
+# 底盘状态桥独立驻留；启动时替换本工作区同域对旧实例，转发电池和大写/ODOM。
+mkdir -p "${WORKSPACE_DIR}/log"
+nohup bash "${WORKSPACE_DIR}/scripts/start_domain0to42_bridge.sh" > "${WORKSPACE_DIR}/log/domain0to42_bridge.log" 2>&1 &
+
 python3 -u robot_console/robot_console/app.py
